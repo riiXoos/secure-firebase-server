@@ -1,10 +1,3 @@
-const express = require('express');
-const admin = require('firebase-admin');
-const cors = require('cors');
-const app = express();
-const PORT = 3000;
-
-// السماح فقط لهذه الدومينات
 const allowedOrigins = [
   'https://riico.space',
   'https://www.riico.space',
@@ -12,15 +5,21 @@ const allowedOrigins = [
   'https://riixoos.github.io/ricoapp90'
 ];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Access Denied'));
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, x-access-token');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
     }
+    next();
+  } else {
+    console.log("⛔ Access Denied from Origin:", origin);
+    res.status(403).send('Access Denied');
   }
-}));
+});
 
 const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_KEY);
 
