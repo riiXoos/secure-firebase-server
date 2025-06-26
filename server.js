@@ -6,7 +6,7 @@ const PORT = 3000;
 
 app.use(cors());
 
-const serviceAccount = require('./service-account-key.json');
+const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_KEY);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
