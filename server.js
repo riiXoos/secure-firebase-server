@@ -1,29 +1,25 @@
-// ===== Secure Firebase Server =====
 const express = require('express');
 const admin = require('firebase-admin');
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// إعداد رمز المصادقة السري
 const AUTH_TOKEN = "super_secret_123";
 
-// إعداد CORS — السماح فقط من riico.space
-app.use(cors({
-  origin: 'https://riico.space'
-}));
+// سماح كامل (هنفلتر بنفسنا)
+app.use(cors());
 
-// إعداد Firebase
 const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_KEY);
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 const db = admin.firestore();
 
-// الحماية + قراءة البيانات
 app.get('/get/:collection', async (req, res) => {
-  const token = req.headers.authorization;
-  if (token !== AUTH_TOKEN) {
+  const clientKey = req.headers['x-client-key'];
+
+  if (clientKey !== AUTH_TOKEN) {
+    console.error("🚫 Access Denied: Invalid client key");
     return res.status(403).json({ error: "Access Denied" });
   }
 
