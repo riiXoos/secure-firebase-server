@@ -2,12 +2,18 @@ const express = require('express');
 const admin = require('firebase-admin');
 const cors = require('cors');
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-// السماح فقط للطلبات القادمة من riico.space
+// السماح فقط للمواقع المعتمدة
+const allowedOrigins = [
+  'https://riico.space',
+  'https://riiXoos.github.io',
+  null // في بعض الأحيان origin بيكون null من GitHub Pages
+];
+
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || origin.includes('riico.space')) {
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Access Denied'));
@@ -32,7 +38,7 @@ app.get('/get/:collection', async (req, res) => {
     snapshot.forEach(doc => {
       result[doc.id] = doc.data();
     });
-    res.json(result);
+    res.json({ secrets: result }); // لازم تكون بنفس الشكل في main.js
   } catch (error) {
     console.error('Error:', error);
     res.status(500).send('حدث خطأ أثناء قراءة البيانات');
