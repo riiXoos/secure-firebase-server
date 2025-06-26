@@ -4,7 +4,16 @@ const cors = require('cors');
 const app = express();
 const PORT = 3000;
 
-app.use(cors());
+// السماح فقط للطلبات القادمة من riico.space
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || origin.includes('riico.space')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Access Denied'));
+    }
+  }
+}));
 
 const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_KEY);
 
