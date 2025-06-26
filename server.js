@@ -4,6 +4,9 @@ const cors = require('cors');
 const app = express();
 const PORT = 3000;
 
+
+const allowedOrigin = 'https://riico.space';
+
 app.use(cors());
 
 const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_KEY);
@@ -16,6 +19,12 @@ const db = admin.firestore();
 
 app.get('/get/:collection', async (req, res) => {
   const collectionName = req.params.collection;
+
+  
+  const origin = req.get('origin') || req.get('referer');
+  if (!origin || !origin.startsWith(allowedOrigin)) {
+    return res.status(403).send('🚫 Access Denied: Unauthorized origin');
+  }
 
   try {
     const snapshot = await db.collection(collectionName).get();
