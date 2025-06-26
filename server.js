@@ -4,29 +4,18 @@ const cors = require('cors');
 const app = express();
 const PORT = 3000;
 
-// السماح بالطلبات
 app.use(cors());
 
-// تصديق Firebase
 const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_KEY);
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
+
 const db = admin.firestore();
 
-// حماية: اسم الدومين المسموح له فقط
-const allowedHost = 'riico.space';
-
-// Endpoint آمن
 app.get('/get/:collection', async (req, res) => {
   const collectionName = req.params.collection;
-
-  // تحقق من الواجهة اللي جاية منها الصفحة
-  const referer = req.get('referer') || '';
-  const originAllowed = referer.includes(allowedHost);
-  if (!originAllowed) {
-    return res.status(403).send('Access Denied');
-  }
 
   try {
     const snapshot = await db.collection(collectionName).get();
