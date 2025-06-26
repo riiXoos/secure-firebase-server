@@ -3,43 +3,37 @@ const admin = require('firebase-admin');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const AUTH_TOKEN = process.env.ACCESS_TOKEN;
+const AUTH_TOKEN = process.env.ACCESS_TOKEN || 'super_secret_123';
 
-// ✅ السماح فقط لـ riico.space
-const ALLOWED_ORIGIN = "https://riico.space";
+// ✅ CORS Middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://riicco.space');  // مهم جدًا
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, x-access-token');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
+// ✅ Auth Middleware
 app.use((req, res, next) => {
   const token = req.headers['x-access-token'];
-
-  // رفض بدون التوكين الصحيح
   if (token !== AUTH_TOKEN) {
     console.log("❌ Access Denied: Token mismatch");
     return res.status(403).json({ error: "Access Denied" });
   }
-
-  // ✅ لو التوكين صحيح، أضف هيدر CORS يدويًا
-  res.setHeader("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
-  res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, x-access-token");
-
-  // ✅ التعامل مع طلب OPTIONS (preflight)
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-
   next();
 });
 
-// ===== Firebase Setup =====
+// ✅ Firebase
 const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_KEY);
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 const db = admin.firestore();
 
-// ===== Endpoint =====
 app.get('/get/:collection', async (req, res) => {
   const collectionName = req.params.collection;
-
   try {
     const snapshot = await db.collection(collectionName).get();
     const result = {};
@@ -48,11 +42,11 @@ app.get('/get/:collection', async (req, res) => {
     });
     res.json({ secrets: result });
   } catch (error) {
-    console.error('❌ Firebase Error:', error);
+    console.error('🔥 Firebase Error:', error);
     res.status(500).send('حدث خطأ أثناء قراءة البيانات');
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ Server is running at http://localhost:${PORT}`);
+  console.log(`🚀 Server is running at http://localhost:${PORT}`);
 });
