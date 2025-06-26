@@ -7,10 +7,10 @@ const AUTH_TOKEN = process.env.ACCESS_TOKEN || 'super_secret_123';
 
 // ✅ CORS Middleware
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://riicco.space');  // مهم جدًا
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, x-access-token');
+  res.header('Access-Control-Allow-Origin', 'https://riicco.space'); // ✅ اسم الدومين المسموح له
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, x-access-token'); // ✅ لازم تضيف الهيدر هنا
   if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+    return res.sendStatus(200); // ✅ السماح لـ preflight
   }
   next();
 });
